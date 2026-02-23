@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ContentSpark — AI Social Media Generator</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap');
+
+  :root {
+    --bg: #0a0a0f;
+    --surface: #111118;
+    --card: #16161f;
+    --border: #2a2a3a;
+    --accent: #ff6b35;
+    --accent2: #7c3aed;
+    --gold: #f59e0b;
+    --text: #f0f0f5;
+    --muted: #6b6b85;
+    --green: #10b981;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Background mesh */
+  body::before {
+    content: '';
+    position: fixed;
+    top: -50%;
+    left: -20%;
+    width: 60vw;
+    height: 60vw;
+    background: radial-gradient(circle, rgba(124,58,237,0.12) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+  body::after {
+    content: '';
+    position: fixed;
+    bottom: -30%;
+    right: -10%;
+    width: 50vw;
+    height: 50vw;
+    background: radial-gradient(circle, rgba(255,107,53,0.10) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* NAV */
+  nav {
+    position: sticky; top: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1rem 2.5rem;
+    background: rgba(10,10,15,0.85);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .logo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 1.4rem;
+    letter-spacing: -0.5px;
+  }
+  .logo span { color: var(--accent); }
+
+  .nav-badge {
+    background: linear-gradient(135deg, var(--accent2), var(--accent));
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    border-radius: 20px;
+    margin-left: 8px;
+    vertical-align: middle;
+  }
+
+  .nav-links { display: flex; gap: 2rem; align-items: center; }
+  .nav-links a { color: var(--muted); text-decoration: none; font-size: 0.9rem; transition: color 0.2s; }
+  .nav-links a:hover { color: var(--text); }
+
+  .btn-primary {
+    background: linear-gradient(135deg, var(--accent), #ff4500);
+    color: #fff;
+    border: none;
+    padding: 0.6rem 1.4rem;
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.15s;
+  }
+  .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
+
+  /* HERO */
+  .hero {
+    position: relative; z-index: 1;
+    text-align: center;
+    padding: 6rem 2rem 4rem;
+    max-width: 860px;
+    margin: 0 auto;
+  }
+
+  .hero-pill {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: rgba(255,107,53,0.1);
+    border: 1px solid rgba(255,107,53,0.3);
+    color: var(--accent);
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    padding: 5px 14px;
+    border-radius: 50px;
+    margin-bottom: 2rem;
+    animation: fadeDown 0.6s ease both;
+  }
+  .hero-pill::before { content: '✦'; font-size: 0.7rem; }
+
+  h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(2.4rem, 6vw, 4.2rem);
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: -1.5px;
+    animation: fadeDown 0.6s 0.1s ease both;
+  }
+  h1 em { font-style: normal; color: var(--accent); }
+
+  .hero-sub {
+    font-size: 1.1rem;
+    color: var(--muted);
+    margin: 1.5rem auto 0;
+    max-width: 540px;
+    line-height: 1.6;
+    font-weight: 300;
+    animation: fadeDown 0.6s 0.2s ease both;
+  }
+
+  /* MAIN APP */
+  .app-shell {
+    position: relative; z-index: 1;
+    max-width: 1100px;
+    margin: 2rem auto 6rem;
+    padding: 0 1.5rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    animation: fadeUp 0.7s 0.3s ease both;
+  }
+
+  .panel {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 1.8rem;
+  }
+
+  .panel-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 0.85rem;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 1.4rem;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .panel-title::before {
+    content: '';
+    width: 8px; height: 8px;
+    background: var(--accent);
+    border-radius: 50%;
+    display: inline-block;
+  }
+
+  label {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--muted);
+    margin-bottom: 0.4rem;
+    letter-spacing: 0.3px;
+  }
+
+  input[type="text"], textarea, select {
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    padding: 0.7rem 1rem;
+    margin-bottom: 1.1rem;
+    transition: border-color 0.2s;
+    resize: none;
+    outline: none;
+  }
+  input:focus, textarea:focus, select:focus {
+    border-color: var(--accent2);
+  }
+  select option { background: var(--surface); }
+
+  /* Platform pills */
+  .platforms { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1.1rem; }
+  .platform-btn {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--muted);
+    padding: 0.45rem 0.9rem;
+    font-size: 0.82rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .platform-btn:hover { border-color: var(--accent); color: var(--text); }
+  .platform-btn.active {
+    background: rgba(255,107,53,0.12);
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  /* Tone pills */
+  .tones { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1.1rem; }
+  .tone-btn {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    color: var(--muted);
+    padding: 0.35rem 0.85rem;
+    font-size: 0.78rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .tone-btn:hover { border-color: var(--accent2); color: var(--text); }
+  .tone-btn.active {
+    background: rgba(124,58,237,0.15);
+    border-color: var(--accent2);
+    color: #a78bfa;
+  }
+
+  .generate-btn {
+    width: 100%;
+    background: linear-gradient(135deg, var(--accent2), var(--accent));
+    border: none;
+    border-radius: 12px;
+    color: #fff;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 1rem;
+    letter-spacing: 0.5px;
+    padding: 0.9rem;
+    cursor: pointer;
+    margin-top: 0.5rem;
+    transition: opacity 0.2s, transform 0.15s, box-shadow 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+  .generate-btn:hover { opacity: 0.92; transform: translateY(-2px); box-shadow: 0 8px 30px rgba(255,107,53,0.3); }
+  .generate-btn:active { transform: translateY(0); }
+  .generate-btn.loading { pointer-events: none; }
+  .generate-btn .btn-inner { display: flex; align-items: center; justify-content: center; gap: 8px; }
+
+  /* Spinner */
+  .spinner {
+    width: 16px; height: 16px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-top-color: #fff;
+    border-radius: 50%;
+    display: none;
+    animation: spin 0.7s linear infinite;
+  }
+  .loading .spinner { display: block; }
+  .loading .btn-text { display: none; }
+
+  /* Output panel */
+  .output-area {
+    min-height: 340px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.2rem;
+    font-size: 0.92rem;
+    line-height: 1.7;
+    color: var(--muted);
+    margin-bottom: 1rem;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.3s;
+  }
+  .output-area.has-content { color: var(--text); border-color: rgba(124,58,237,0.4); }
+
+  .placeholder-hint {
+    position: absolute; top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+  }
+  .placeholder-hint .big-icon { font-size: 2.5rem; margin-bottom: 0.5rem; opacity: 0.3; }
+  .placeholder-hint p { font-size: 0.82rem; color: var(--muted); }
+
+  .output-text { white-space: pre-wrap; display: none; }
+  .output-area.has-content .placeholder-hint { display: none; }
+  .output-area.has-content .output-text { display: block; animation: fadeIn 0.5s ease; }
+
+  /* Variants */
+  .variants-grid { display: flex; flex-direction: column; gap: 0.8rem; }
+  .variant-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1rem 1.2rem;
+    cursor: pointer;
+    transition: border-color 0.2s, transform 0.15s;
+    position: relative;
+  }
+  .variant-card:hover { border-color: var(--accent2); transform: translateX(4px); }
+  .variant-card.selected { border-color: var(--accent); background: rgba(255,107,53,0.05); }
+  .variant-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 0.4rem;
+  }
+  .variant-preview { font-size: 0.85rem; color: var(--muted); line-height: 1.5; }
+
+  /* Action buttons */
+  .action-row { display: flex; gap: 0.6rem; }
+  .btn-action {
+    flex: 1;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--muted);
+    padding: 0.6rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex; align-items: center; justify-content: center; gap: 5px;
+  }
+  .btn-action:hover { border-color: var(--accent); color: var(--accent); }
+  .btn-action.copied { border-color: var(--green); color: var(--green); }
+
+  /* Pro badge */
+  .pro-lock {
+    display: inline-flex; align-items: center; gap: 5px;
+    background: linear-gradient(135deg, #f59e0b22, #f59e0b11);
+    border: 1px solid #f59e0b55;
+    color: var(--gold);
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    padding: 3px 8px;
+    border-radius: 6px;
+  }
+
+  /* Pricing teaser */
+  .pricing-strip {
+    position: relative; z-index: 1;
+    max-width: 900px;
+    margin: 0 auto 5rem;
+    padding: 0 1.5rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 1rem;
+    animation: fadeUp 0.7s 0.5s ease both;
+  }
+
+  .price-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 1.6rem;
+    text-align: center;
+    transition: transform 0.2s, border-color 0.2s;
+  }
+  .price-card:hover { transform: translateY(-4px); }
+  .price-card.featured {
+    border-color: var(--accent);
+    background: linear-gradient(160deg, rgba(255,107,53,0.07), var(--card));
+  }
+
+  .price-name {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 0.8rem;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 0.8rem;
+  }
+  .price-amount {
+    font-family: 'Syne', sans-serif;
+    font-size: 2.2rem;
+    font-weight: 800;
+    margin-bottom: 0.2rem;
+  }
+  .price-amount sup { font-size: 1rem; vertical-align: super; margin-right: 2px; }
+  .price-period { font-size: 0.78rem; color: var(--muted); margin-bottom: 1.2rem; }
+  .price-features { list-style: none; text-align: left; font-size: 0.83rem; color: var(--muted); line-height: 2; margin-bottom: 1.4rem; }
+  .price-features li::before { content: '✓ '; color: var(--green); font-weight: 700; }
+  .price-features li.no::before { content: '✕ '; color: var(--border); }
+
+  .section-label {
+    text-align: center;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 0.75rem;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 1rem;
+    position: relative; z-index: 1;
+    animation: fadeUp 0.7s 0.4s ease both;
+  }
+
+  @keyframes fadeDown { from { opacity:0; transform: translateY(-16px); } to { opacity:1; transform: translateY(0); } }
+  @keyframes fadeUp   { from { opacity:0; transform: translateY(20px); }  to { opacity:1; transform: translateY(0); } }
+  @keyframes fadeIn   { from { opacity:0; } to { opacity:1; } }
+  @keyframes spin     { to { transform: rotate(360deg); } }
+  @keyframes pulse    { 0%,100% { opacity:1; } 50% { opacity:0.5; } }
+
+  .typing::after {
+    content: '▌';
+    animation: pulse 0.8s infinite;
+    color: var(--accent);
+  }
+
+  @media (max-width: 768px) {
+    .app-shell { grid-template-columns: 1fr; }
+    .pricing-strip { grid-template-columns: 1fr; }
+    nav { padding: 1rem 1.2rem; }
+    .nav-links { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">Content<span>Spark</span> <span class="nav-badge">AI</span></div>
+  <div class="nav-links">
+    <a href="#">Features</a>
+    <a href="#">Pricing</a>
+    <a href="#">Templates</a>
+  </div>
+  <button class="btn-primary">Get Started Free</button>
+</nav>
+
+<div class="hero">
+  <div class="hero-pill">Powered by Claude AI</div>
+  <h1>Generate <em>viral</em> social content<br>in seconds, not hours</h1>
+  <p class="hero-sub">Turn any idea into ready-to-post content for Instagram, Twitter, LinkedIn, TikTok & more — crafted by AI, approved by you.</p>
+</div>
+
+<div class="app-shell">
+  <!-- LEFT: Input Panel -->
+  <div class="panel">
+    <div class="panel-title">Your Brief</div>
+
+    <label>What's your topic or product?</label>
+    <input type="text" id="topic" placeholder="e.g. My new skincare brand launch..." />
+
+    <label>Platform</label>
+    <div class="platforms">
+      <button class="platform-btn active" data-platform="Instagram">📸 Instagram</button>
+      <button class="platform-btn" data-platform="Twitter/X">𝕏 Twitter/X</button>
+      <button class="platform-btn" data-platform="LinkedIn">💼 LinkedIn</button>
+      <button class="platform-btn" data-platform="TikTok">🎵 TikTok</button>
+      <button class="platform-btn" data-platform="Facebook">👍 Facebook</button>
+    </div>
+
+    <label>Tone of voice</label>
+    <div class="tones">
+      <button class="tone-btn active" data-tone="Engaging & Fun">Engaging & Fun</button>
+      <button class="tone-btn" data-tone="Professional">Professional</button>
+      <button class="tone-btn" data-tone="Inspirational">Inspirational</button>
+      <button class="tone-btn" data-tone="Witty & Bold">Witty & Bold</button>
+      <button class="tone-btn" data-tone="Conversational">Conversational</button>
+    </div>
+
+    <label>Goal <span class="pro-lock">⚡ PRO</span></label>
+    <select disabled style="opacity:0.5;cursor:not-allowed">
+      <option>Drive Sales / Conversions</option>
+      <option>Build Awareness</option>
+      <option>Grow Followers</option>
+      <option>Drive Traffic</option>
+    </select>
+
+    <label>Hashtags style</label>
+    <select id="hashtags">
+      <option value="popular">Popular (trending)</option>
+      <option value="niche">Niche (targeted)</option>
+      <option value="minimal">Minimal (3–5 only)</option>
+      <option value="none">No hashtags</option>
+    </select>
+
+    <button class="generate-btn" id="generateBtn" onclick="generateContent()">
+      <div class="btn-inner">
+        <div class="spinner"></div>
+        <span class="btn-text">✦ Generate Content</span>
+      </div>
+    </button>
+  </div>
+
+  <!-- RIGHT: Output Panel -->
+  <div class="panel">
+    <div class="panel-title" style="justify-content:space-between">
+      <span>Generated Post</span>
+      <span id="charCount" style="font-size:0.78rem;letter-spacing:0;text-transform:none;color:var(--muted)"></span>
+    </div>
+
+    <div class="output-area" id="outputArea">
+      <div class="placeholder-hint">
+        <div class="big-icon">✦</div>
+        <p>Fill in your brief and click<br>Generate to create content</p>
+      </div>
+      <div class="output-text" id="outputText"></div>
+    </div>
+
+    <div class="action-row" style="margin-bottom:1rem">
+      <button class="btn-action" id="copyBtn" onclick="copyContent()">📋 Copy</button>
+      <button class="btn-action" onclick="regenerate()">↻ Regenerate</button>
+      <button class="btn-action" onclick="exportContent()">⬇ Export</button>
+    </div>
+
+    <div class="panel-title">3 Variants <span class="pro-lock">⚡ PRO — Unlock All</span></div>
+    <div class="variants-grid" id="variantsGrid">
+      <div style="color:var(--muted);font-size:0.82rem;opacity:0.6;text-align:center;padding:2rem 0">
+        Variants appear after generating your first post
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Pricing Section -->
+<p class="section-label">Simple Pricing</p>
+<div class="pricing-strip">
+  <div class="price-card">
+    <div class="price-name">Free</div>
+    <div class="price-amount"><sup>$</sup>0</div>
+    <div class="price-period">forever</div>
+    <ul class="price-features">
+      <li>5 posts/day</li>
+      <li>3 platforms</li>
+      <li>Basic tones</li>
+      <li class="no">Variants</li>
+      <li class="no">Analytics</li>
+    </ul>
+    <button class="btn-primary" style="width:100%;background:var(--surface);border:1px solid var(--border);color:var(--text)">Get Started</button>
+  </div>
+
+  <div class="price-card featured">
+    <div class="price-name">Pro ⚡</div>
+    <div class="price-amount" style="color:var(--accent)"><sup>$</sup>19</div>
+    <div class="price-period">per month</div>
+    <ul class="price-features">
+      <li>Unlimited posts</li>
+      <li>All platforms</li>
+      <li>All tones & goals</li>
+      <li>3 variants per post</li>
+      <li>Bulk scheduler</li>
+    </ul>
+    <button class="btn-primary" style="width:100%">Start Free Trial</button>
+  </div>
+
+  <div class="price-card">
+    <div class="price-name">Agency</div>
+    <div class="price-amount"><sup>$</sup>79</div>
+    <div class="price-period">per month</div>
+    <ul class="price-features">
+      <li>Everything in Pro</li>
+      <li>10 team seats</li>
+      <li>Client workspaces</li>
+      <li>White-label exports</li>
+      <li>Priority support</li>
+    </ul>
+    <button class="btn-primary" style="width:100%;background:var(--surface);border:1px solid var(--border);color:var(--text)">Contact Sales</button>
+  </div>
+</div>
+
+<script>
+  let selectedPlatform = 'Instagram';
+  let selectedTone = 'Engaging & Fun';
+  let currentContent = '';
+
+  document.querySelectorAll('.platform-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.platform-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      selectedPlatform = btn.dataset.platform;
+    });
+  });
+
+  document.querySelectorAll('.tone-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tone-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      selectedTone = btn.dataset.tone;
+    });
+  });
+
+  async function generateContent() {
+    const topic = document.getElementById('topic').value.trim();
+    if (!topic) { alert('Please enter a topic or product!'); return; }
+
+    const btn = document.getElementById('generateBtn');
+    btn.classList.add('loading');
+
+    const outputArea = document.getElementById('outputArea');
+    const outputText = document.getElementById('outputText');
+    outputArea.classList.remove('has-content');
+    outputText.classList.remove('typing');
+    outputText.textContent = '';
+
+    const hashtagStyle = document.getElementById('hashtags').value;
+
+    const prompt = `You are an expert social media copywriter. Create a high-performing, ready-to-post ${selectedPlatform} post about: "${topic}".
+
+Tone: ${selectedTone}
+Hashtag style: ${hashtagStyle === 'popular' ? 'use 10-15 trending hashtags' : hashtagStyle === 'niche' ? 'use 8-12 targeted niche hashtags' : hashtagStyle === 'minimal' ? 'use only 3-5 hashtags' : 'no hashtags'}
+
+Write ONE compelling post that will drive engagement. Include:
+- A strong hook opening line
+- The main content (platform-appropriate length)
+- A clear call to action
+${hashtagStyle !== 'none' ? '- Relevant hashtags' : ''}
+
+Format it exactly as it would appear when posted. No preamble, just the post itself.`;
+
+    try {
+      const response = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: "claude-sonnet-4-20250514",
+          max_tokens: 1000,
+          messages: [{ role: "user", content: prompt }]
+        })
+      });
+
+      const data = await response.json();
+      currentContent = data.content?.[0]?.text || '';
+
+      // Typewriter effect
+      outputArea.classList.add('has-content');
+      outputText.classList.add('typing');
+      let i = 0;
+      const interval = setInterval(() => {
+        outputText.textContent = currentContent.slice(0, i);
+        i += 4;
+        document.getElementById('charCount').textContent = `${Math.min(i, currentContent.length)} chars`;
+        if (i >= currentContent.length) {
+          clearInterval(interval);
+          outputText.textContent = currentContent;
+          outputText.classList.remove('typing');
+          document.getElementById('charCount').textContent = `${currentContent.length} chars`;
+          generateVariants(topic);
+        }
+      }, 18);
+
+    } catch (err) {
+      outputArea.classList.add('has-content');
+      outputText.textContent = '⚠️ Could not connect to AI. Please check your connection and try again.\n\nError: ' + err.message;
+    }
+
+    btn.classList.remove('loading');
+  }
+
+  async function generateVariants(topic) {
+    const grid = document.getElementById('variantsGrid');
+    grid.innerHTML = '<div style="color:var(--muted);font-size:0.82rem;text-align:center;padding:1rem;animation:pulse 1s infinite">Generating variants...</div>';
+
+    const prompt = `Create 3 short, distinct variations of a ${selectedPlatform} post about "${topic}" with a ${selectedTone} tone. Each variant should have a completely different angle/hook. Keep each under 80 words. Format as:
+
+VARIANT 1:
+[post]
+
+VARIANT 2:
+[post]
+
+VARIANT 3:
+[post]`;
+
+    try {
+      const response = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: "claude-sonnet-4-20250514",
+          max_tokens: 800,
+          messages: [{ role: "user", content: prompt }]
+        })
+      });
+
+      const data = await response.json();
+      const text = data.content?.[0]?.text || '';
+      const variants = text.split(/VARIANT \d+:/i).filter(v => v.trim());
+
+      grid.innerHTML = '';
+      variants.slice(0, 3).forEach((v, i) => {
+        const card = document.createElement('div');
+        card.className = 'variant-card';
+        card.innerHTML = `<div class="variant-label">Variant ${i + 1}</div><div class="variant-preview">${v.trim().slice(0, 120)}...</div>`;
+        card.onclick = () => {
+          document.querySelectorAll('.variant-card').forEach(c => c.classList.remove('selected'));
+          card.classList.add('selected');
+          const outputText = document.getElementById('outputText');
+          currentContent = v.trim();
+          outputText.textContent = currentContent;
+          document.getElementById('charCount').textContent = `${currentContent.length} chars`;
+        };
+        grid.appendChild(card);
+      });
+    } catch {
+      grid.innerHTML = '<div style="color:var(--muted);font-size:0.82rem;text-align:center;padding:1rem">Upgrade to Pro to unlock variants</div>';
+    }
+  }
+
+  function regenerate() {
+    if (!document.getElementById('topic').value.trim()) return;
+    generateContent();
+  }
+
+  function copyContent() {
+    if (!currentContent) return;
+    navigator.clipboard.writeText(currentContent).then(() => {
+      const btn = document.getElementById('copyBtn');
+      btn.classList.add('copied');
+      btn.textContent = '✓ Copied!';
+      setTimeout(() => { btn.classList.remove('copied'); btn.textContent = '📋 Copy'; }, 2000);
+    });
+  }
+
+  function exportContent() {
+    if (!currentContent) return;
+    const blob = new Blob([currentContent], { type: 'text/plain' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'social-post.txt';
+    a.click();
+  }
+</script>
+</body>
+</html>
